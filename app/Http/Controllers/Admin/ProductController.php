@@ -71,10 +71,15 @@ class ProductController extends Controller
     }
 
     public function index()
-    {
-        $orders = Product::all();
-        return view('my_orders', ['orders' => $orders]);
-    }
+{
+    $products = Product::where('status', 'approved')->get();
+    return view('index', ['products' => $products]);
+}
+public function adminProductList()
+{
+    $products = Product::all();
+    return view('admin.products.index', ['products' => $products]);
+}
 
     public function sellerDashboard()
     {

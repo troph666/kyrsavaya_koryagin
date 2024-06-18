@@ -18,12 +18,16 @@
 </div>
 
     <div class="user-actions">
-    <a href="{{ route('catalog') }}">Каталог товаров</a>
+    <a href="{{ route('catalog') }}" style="padding: 10px 20px; font-size: 16px; text-decoration: none; color: #ffffff; background-color: #0056b3; border-radius: 5px; transition: background-color 0.3s; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+    Каталог товаров
+</a>
+
+
     </div>
     <div class="auth-buttons">
     @auth
             @if(Auth::user()->role == 'seller')
-                <a href="#" onclick="showSection('seller-dashboard')">Личный кабинет продавца</a>
+            <a href="#" onclick="showSection('seller-dashboard')">Личный кабинет продавца</a>
             @elseif(Auth::user()->isAdmin())
                 <a href="#" onclick="showSection('admin-dashboard')">Личный кабинет админа</a>
             @else
@@ -43,56 +47,126 @@
 <main>
     @auth
         @if(Auth::user()->role == 'seller')
-            <section id="seller-dashboard" class="dashboard">
-                <h2>Личный кабинет продавца</h2>
-                <nav>
-                    <ul>
-                        <li><a href="#" onclick="showSection('product-catalog'); hideAuth();">Главная</a></li>
-                        <li><a href="#" onclick="showSellerSection('seller-products')">Мои товары</a></li>
-                        <li><a href="#" onclick="showSellerSection('seller-orders')">Заказы</a></li>
-                    </ul>
-                </nav>
-                <div id="seller-products" class="seller-section">
-                    <h3>Мои товары</h3>
-                    <form action="{{ route('product.add') }}" method="POST" class="add-product-form" style="border: 1px solid #ccc; border-radius: 5px; padding: 20px; margin-bottom: 20px; background-color: #f9f9f9;" enctype="multipart/form-data">
-                    @csrf
-                        <div class="form-group" style="margin-bottom: 15px;">
-                            <label for="product-name" style="display: block; margin-bottom: 5px;">Название товара:</label>
-                            <input type="text" id="product-name" name="product-name" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
-                        </div>
-                        <div class="form-group" style="margin-bottom: 15px;">
-                            <label for="product-description" style="display: block; margin-bottom: 5px;">Описание товара:</label>
-                            <textarea id="product-description" name="product-description" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;"></textarea>
-                        </div>
-                        <div class="form-group" style="margin-bottom: 15px;">
-                            <label for="product-price" style="display: block; margin-bottom: 5px;">Цена:</label>
-                            <input type="number" id="product-price" name="product-price" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
-                        </div>
+        <section id="seller-dashboard" class="dashboard">
+    <h2>Личный кабинет продавца</h2>
+    <nav>
+        <ul>
+            <li><a href="#" onclick="showSection('product-catalog'); hideSellerSections(); return false;">Главная</a></li>
+            <li><a href="http://127.0.0.1:8000/seller/products" onclick="hideSellerSections();">Мои товары</a></li>
+            <li><a href="#" onclick="showSellerSection('seller-orders'); hideSection('product-catalog'); return false;">Заказы</a></li>
+        </ul>
+    </nav>
 
-                        <div class="form-group">
-                        <label for="product-image">Изображение товара:</label>
-                        <input type="file" id="product-image" name="product-image">
-                            </div>
+    <div id="seller-products" class="seller-section">
+        <h3></h3>
+        <form id="add-product-form" action="{{ route('product.add') }}" method="POST" class="add-product-form" enctype="multipart/form-data">
+            @csrf
+            <div class="form-group">
+                <label for="product-name">Название товара:</label>
+                <input type="text" id="product-name" name="product-name" required class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="product-description">Описание товара:</label>
+                <textarea id="product-description" name="product-description" required class="form-control"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="product-price">Цена:</label>
+                <input type="number" id="product-price" name="product-price" required class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="product-image">Изображение товара:</label>
+                <input type="file" id="product-image" name="product-image" class="form-control-file">
+            </div>
+            <div class="form-group">
+                <label for="product-category">Категория:</label>
+                <select id="product-category" name="product-category" class="form-control">
+                    <option value="category1">Электроника</option>
+                    <option value="category2">Обувь</option>
+                    <option value="category3">Мебель</option>
+                    <option value="category4">Аксессуары</option>
+                    <option value="category5">Автотовары</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Добавить товар</button>
+        </form>
+        <div id="seller-product-list" class="product-list"></div>
+    </div>
+    <div id="seller-orders" class="seller-section hidden">
+        <h3>Заказы</h3>
+        <div id="seller-order-list" class="order-list"></div>
+    </div>
+</section>
 
-                        <div class="form-group" style="margin-bottom: 15px;">
-                            <label for="product-category" style="display: block; margin-bottom: 5px;">Категория:</label>
-                            <select id="product-category" name="product-category" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
-                                <option value="category1">Электроника</option>
-                                <option value="category2">Обувь</option>
-                                <option value="category3">Мебель</option>
-                                <option value="category4">Аксессуары</option>
-                                <option value="category5">Автотовары</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn-submit" style="background-color: #007bff; color: #fff; border: none; border-radius: 5px; padding: 10px 20px; cursor: pointer;">Добавить товар</button>
-                    </form>
-                    <div id="seller-product-list" class="product-list"></div>
-                </div>
-                <div id="seller-orders" class="seller-section hidden">
-                    <h3>Заказы</h3>
-                    <div id="seller-order-list" class="order-list"></div>
-                </div>
-            </section>
+<style>
+    .dashboard {
+        max-width: 800px;
+        margin: 30px auto;
+        padding: 20px;
+        background-color: #f9f9f9;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    nav ul {
+        list-style-type: none;
+        padding: 0;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    nav ul li {
+        display: inline-block;
+        margin-right: 10px;
+    }
+    nav ul li a {
+        text-decoration: none;
+        color: #007bff;
+        font-weight: bold;
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+    }
+    .seller-section {
+        margin-top: 20px;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 15px;
+        box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+    .form-group {
+        margin-bottom: 15px;
+    }
+    .btn {
+        cursor: pointer;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        color: #fff;
+        background-color: #007bff;
+    }
+    .form-control, .form-control-file {
+        width: calc(100% - 22px);
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+    .form-control-file {
+        padding: 8px;
+    }
+    .product-list {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        margin-top: 20px;
+    }
+    .order-list {
+    }
+    .hidden {
+        display: none;
+    }
+</style>
+
+
         @elseif(Auth::user()->isAdmin())
         <section id="admin-dashboard" class="dashboard" style="margin: 20px;">
     <div class="container" style="max-width: 1200px; margin: auto; padding: 20px; background-color: #fff; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
@@ -155,7 +229,6 @@
         justify-content: space-between;
         gap: 20px;
     }
-
     .product-card {
         background-color: #ffffff;
         border: 1px solid #dddddd;
@@ -164,42 +237,35 @@
         padding: 20px;
         width: calc(33% - 20px);
     }
-
     .product-card img {
         width: 100%;
         height: auto;
         border-radius: 8px;
     }
-
     .product-title {
         font-size: 18px;
         margin: 10px 0;
     }
-
     .product-description {
         font-size: 16px;
         color: #555555;
         margin-bottom: 10px;
     }
-
     .product-price {
         font-size: 16px;
         color: #d9534f;
         margin: 10px 0;
     }
-
     .product-category {
         font-size: 16px;
         color: #007bff;
         margin: 10px 0;
     }
-
     .product-seller {
         font-size: 16px;
         color: #555555;
         margin: 10px 0;
     }
-
     .add-to-cart-button,
     .details-button {
         padding: 10px 20px;
@@ -211,22 +277,18 @@
         margin-top: 10px;
         transition: background-color 0.3s;
     }
-
     .add-to-cart-button:hover,
     .details-button:hover {
         background-color: #0056b3;
     }
-
     .cart {
         display: none;
     }
-
     .cart-items {
         display: flex;
         flex-wrap: wrap;
         gap: 20px;
     }
-
     .clear-cart-button,
     .checkout-button {
         padding: 10px 20px;
@@ -238,31 +300,51 @@
         margin-top: 10px;
         transition: background-color 0.3s;
     }
-
     .clear-cart-button:hover,
     .checkout-button:hover {
         background-color: #c9302c;
     }
-</style>
-
-<div id="product-list" class="product-list">
+    </style>
+    <div id="product-list" class="product-list">
     @foreach($products as $product)
-<div class="product-card">
-    <h3 class="product-title">{{ $product->name }}</h3>
-    <img src="{{ asset($product->image) }}" alt="{{ $product->name }}">
-    <p class="product-description">{{ $product->description }}</p>
-    <p class="product-price">Цена: {{ $product->price }}</p>
-    <p class="product-category">Категория: {{ $product->category }}</p>
-    <p class="product-seller">Продавец: {{ $product->seller_name }}</p>
-    <form action="{{ route('order.create') }}" method="POST">
-        @csrf
-        <input type="hidden" name="product_id" value="{{ $product->id }}">
-        <input type="hidden" name="product_name" value="{{ $product->name }}">
-        <input type="hidden" name="product_price" value="{{ $product->price }}">
-        <button type="submit">Оформить заказ</button>
-    </form>
+        <div class="product-card">
+            <h3 class="product-title">{{ $product->name }}</h3>
+            <img src="{{ asset($product->image) }}" alt="{{ $product->name }}">
+            <p class="product-description">{{ $product->description }}</p>
+            <p class="product-price">Цена: {{ $product->price }}</p>
+            <p class="product-category">Категория: 
+                @switch($product->category)
+                    @case('category1')
+                        Электроника
+                        @break
+                    @case('category2')
+                        Обувь
+                        @break
+                    @case('category3')
+                        Мебель
+                        @break
+                    @case('category4')
+                        Аксессуары
+                        @break
+                    @case('category5')
+                        Автотовары
+                        @break
+                    @default
+                        Неизвестная категория
+                @endswitch
+            </p>
+            <p class="product-seller">Продавец: {{ $product->seller_name }}</p>
+            <form action="{{ route('order.create') }}" method="POST">
+                @csrf
+                <input type="hidden" name="product_id" value="{{ $product->id }}">
+                <input type="hidden" name="product_name" value="{{ $product->name }}">
+                <input type="hidden" name="product_price" value="{{ $product->price }}">
+                <button type="submit">Оформить заказ</button>
+            </form>
+        </div>
+    @endforeach
 </div>
-@endforeach
+
 
 
 <script>
@@ -337,14 +419,15 @@ function searchProducts(event) {
 
 
     function register(event) {
-    event.preventDefault();
-    const role = document.getElementById('role').value;
-    if (role === 'seller') {
-        showSection('seller-dashboard');
-    } else {
-        showSection('buyer-dashboard');
+        event.preventDefault();
+        const role = document.getElementById('role').value;
+        if (role === 'seller') {
+            document.querySelector('.user-actions').classList.add('hidden');
+            document.querySelector('.auth-buttons').classList.remove('hidden');
+        } else {
+            showSection('buyer-dashboard');
+        }
     }
-}
 
 
 function showSection(sectionId) {
